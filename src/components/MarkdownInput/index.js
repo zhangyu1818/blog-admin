@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import codemirror from 'codemirror';
 import { debounce } from 'lodash';
 import styles from './styles.less';
@@ -69,6 +69,34 @@ import 'codemirror/theme/yeti.css';
 import 'codemirror/theme/yonce.css';
 import 'codemirror/theme/zenburn.css';
 
+const getStr = {
+  bold: str => `**${str}**`,
+  italic: str => `*${str}*`,
+  strikethrough: str => `~~${str}~~`,
+  underline: str => `++${str}++`,
+  heading1: str => `# ${str}`,
+  heading2: str => `## ${str}`,
+  heading3: str => `### ${str}`,
+  heading4: str => `#### ${str}`,
+  heading5: str => `##### ${str}`,
+  heading6: str => `###### ${str}`,
+  unorderedList: str => `- ${str}`,
+  orderedList: str => `1. ${str}`,
+  link: str => `[${str}]()`,
+  image: str => `![${str}]()`,
+  unCompleted: str => `- [ ] ${str}`,
+  completed: str => `- [x] ${str}`,
+  code: str => `\n\`\`\`\n${str}\n\`\`\``,
+};
+const getEmptyOffset = {
+  bold: 2,
+  italic: 1,
+  strikethrough: 2,
+  underline: 2,
+  link: 1,
+  image: 2,
+};
+
 const MarkdownInput = forwardRef(({ onChange, onScroll, scrollPercent, className }, ref) => {
   const textAreaRef = useRef();
   const editor = useRef();
@@ -98,6 +126,7 @@ const MarkdownInput = forwardRef(({ onChange, onScroll, scrollPercent, className
     ref,
     () => ({
       action: action => {
+        editor.current.focus();
         switch (action) {
           case 'undo':
             editor.current.undo();
@@ -105,31 +134,89 @@ const MarkdownInput = forwardRef(({ onChange, onScroll, scrollPercent, className
           case 'redo':
             editor.current.redo();
             return;
+          case 'horizontalRule': {
+            editor.current.execCommand('goLineEnd');
+            if (editor.current.getLine(editor.current.getCursor().line))
+              editor.current.execCommand('newlineAndIndent');
+            editor.current.execCommand('newlineAndIndent');
+            const pos = editor.current.getCursor();
+            editor.current.replaceRange('---', pos, pos);
+            editor.current.execCommand('newlineAndIndent');
+            return;
+          }
+          case 'table': {
+            editor.current.execCommand('goLineEnd');
+            if (editor.current.getLine(editor.current.getCursor().line))
+              editor.current.execCommand('newlineAndIndent');
+            editor.current.execCommand('newlineAndIndent');
+            const pos = editor.current.getCursor();
+            editor.current.replaceRange(
+              `header 1 | header 2
+---|---
+row 1 col 1 | row 1 col 2
+row 2 col 1 | row 2 col 2`,
+              pos,
+              pos
+            );
+            editor.current.execCommand('newlineAndIndent');
+            return;
+          }
+          case 'quote': {
+            editor.current.execCommand('goLineStart');
+            const pos = editor.current.getCursor();
+            editor.current.replaceRange('> ', pos, pos);
+            editor.current.execCommand('goLineEnd');
+            return;
+          }
           case 'highlight': {
             editor.current
               .listSelections()
-              .map(({ anchor, head }) => [
-                { line: anchor.line, ch: anchor.ch },
-                { line: head.line, ch: head.ch },
-              ])
+              .map(({ anchor, head }) =>
+                [{ line: anchor.line, ch: anchor.ch }, { line: head.line, ch: head.ch }].sort(
+                  (a, b) => {
+                    if (a.line !== b.line) return a.line - b.line;
+                    return a.ch - b.ch;
+                  }
+                )
+              )
               .forEach(selected => {
                 const [start, end] = selected;
-                const markedText = editor.current.markText(start, end, {
-                  className: 'styled-background',
+                let isExist = false;
+                editor.current.findMarks(start, end).forEach(marked => {
+                  const { from, to } = marked.find();
+                  if (
+                    !isExist &&
+                    from.line === start.line &&
+                    from.ch === start.ch &&
+                    to.line === end.line &&
+                    to.ch === end.ch
+                  )
+                    isExist = true;
+                  marked.clear();
+                });
+                if (isExist) return;
+                editor.current.markText(start, end, {
+                  className: styles.markedText,
+                  addToHistory: true,
                 });
               });
             return;
           }
           default: {
-            const selections = editor.current.getSelections();
-            const newStr = {
-              bold: str => `**${str}**`,
-              italic: str => `*${str}*`,
-              strikethrough: str => `~~${str}~~`,
-              underline: str => `++${str}++`,
-            };
-            const boldSelections = selections.map(str => (str !== '' ? newStr[action](str) : str));
-            editor.current.replaceSelections(boldSelections, 'around');
+            if (editor.current.somethingSelected()) {
+              const selections = editor.current.getSelections();
+              const newSelections = selections.map(str => (str !== '' ? getStr[action](str) : str));
+              editor.current.replaceSelections(newSelections);
+            } else {
+              const pos = editor.current.getCursor();
+              editor.current.replaceRange(getStr[action](''), pos, pos);
+              const offset = getEmptyOffset[action];
+              if (offset) editor.current.setCursor({ ...pos, ch: pos.ch + offset });
+            }
+            if (action === 'code') {
+              editor.current.execCommand('goLineUp');
+              editor.current.execCommand('goLineEnd');
+            }
           }
         }
       },

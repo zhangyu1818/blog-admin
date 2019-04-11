@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, forwardRef, useCallback } from 'react';
 
-const MarkdownOutput = forwardRef(({ scrollPercent, onScroll, className }, ref) => {
+const MarkdownOutput = forwardRef(({ scrollPercent, onScroll, className, showView }, ref) => {
   const mouseIn = useRef(false);
   const markdownBodyRef = ref;
   const onMarkdownBodyScroll = useCallback(() => {
@@ -30,6 +30,7 @@ const MarkdownOutput = forwardRef(({ scrollPercent, onScroll, className }, ref) 
   );
   return (
     <div
+      style={{ display: !showView ? 'none' : null }}
       className={className}
       onScroll={onMarkdownBodyScroll}
       onMouseEnter={() => {

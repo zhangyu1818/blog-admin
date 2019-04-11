@@ -81,8 +81,13 @@ const themeList = [
   },
 ];
 
+const CustomIcon = Icon.createFromIconfontCN({
+  scriptUrl: '//at.alicdn.com/t/font_1007533_78af8ffle8i.js',
+});
+
 const Markdown = props => {
   const [scroll, setScroll] = useState(0);
+  const [showView, setShowView] = useState(true);
   const [theme, setTheme] = useState(localStorage.getItem('markdown-theme') || 'default');
   const outputAreaRef = useRef();
   const inputAreaRef = useRef();
@@ -171,36 +176,73 @@ const Markdown = props => {
           onClick={onClickToolBar('highlight')}
         />
         <Divider type="vertical" />
-        <i className={styles.actionIcon} title="Heading 1" onClick={onClickToolBar('heading-1')}>
+        <i className={styles.actionIcon} title="Heading 1" onClick={onClickToolBar('heading1')}>
           h1
         </i>
-        <i className={styles.actionIcon} title="Heading 2" onClick={onClickToolBar('heading-2')}>
+        <i className={styles.actionIcon} title="Heading 2" onClick={onClickToolBar('heading2')}>
           h2
         </i>
-        <i className={styles.actionIcon} title="Heading 3" onClick={onClickToolBar('heading-3')}>
+        <i className={styles.actionIcon} title="Heading 3" onClick={onClickToolBar('heading3')}>
           h3
         </i>
-        <i className={styles.actionIcon} title="Heading 4" onClick={onClickToolBar('heading-4')}>
+        <i className={styles.actionIcon} title="Heading 4" onClick={onClickToolBar('heading4')}>
           h4
         </i>
-        <i className={styles.actionIcon} title="Heading 5" onClick={onClickToolBar('heading-5')}>
+        <i className={styles.actionIcon} title="Heading 5" onClick={onClickToolBar('heading5')}>
           h5
         </i>
-        <i className={styles.actionIcon} title="Heading 6" onClick={onClickToolBar('heading-6')}>
+        <i className={styles.actionIcon} title="Heading 6" onClick={onClickToolBar('heading6')}>
           h6
         </i>
         <Divider type="vertical" />
         <Icon
           className={styles.actionIcon}
+          type="minus"
+          title="Horizontal rule"
+          onClick={onClickToolBar('horizontalRule')}
+        />{' '}
+        <CustomIcon
+          className={styles.actionIcon}
+          type="icon-quote"
+          title="Quote"
+          onClick={onClickToolBar('quote')}
+        />
+        <Icon
+          className={styles.actionIcon}
           type="bars"
-          title="Unordered List"
-          onClick={onClickToolBar('unordered-ist')}
+          title="Unordered list"
+          onClick={onClickToolBar('unorderedList')}
         />
         <Icon
           className={styles.actionIcon}
           type="ordered-list"
-          title="Ordered List"
-          onClick={onClickToolBar('ordered-ist')}
+          title="Ordered list"
+          onClick={onClickToolBar('orderedList')}
+        />
+        <Icon
+          className={styles.actionIcon}
+          type="border"
+          title="Incomplete task list"
+          onClick={onClickToolBar('unCompleted')}
+        />
+        <Icon
+          className={styles.actionIcon}
+          type="check-square"
+          title="Complete task list"
+          onClick={onClickToolBar('completed')}
+        />
+        <Divider type="vertical" />
+        <Icon
+          className={styles.actionIcon}
+          type="code"
+          title="Code"
+          onClick={onClickToolBar('code')}
+        />
+        <Icon
+          className={styles.actionIcon}
+          type="table"
+          title="Table"
+          onClick={onClickToolBar('table')}
         />
         <Icon
           className={styles.actionIcon}
@@ -208,7 +250,19 @@ const Markdown = props => {
           title="Link"
           onClick={onClickToolBar('link')}
         />
-        <Icon className={styles.actionIcon} type="picture" title="Image" />
+        <Icon
+          className={styles.actionIcon}
+          type="picture"
+          title="Image"
+          onClick={onClickToolBar('image')}
+        />
+        <Divider type="vertical" />
+        <Icon
+          className={styles.actionIcon}
+          type={showView ? 'eye-invisible' : 'eye'}
+          title={showView ? 'UnWatch' : 'Watch'}
+          onClick={() => setShowView(prevState => !prevState)}
+        />
         <Popover
           overlayClassName={styles.themeListWrapper}
           placement="bottom"
@@ -218,7 +272,10 @@ const Markdown = props => {
           <Icon className={styles.actionIcon} type="skin" title="Theme" />
         </Popover>
       </div>
-      <div className={classNames(styles.writeContainer, containerClassName)}>
+      <div
+        className={classNames(styles.writeContainer, containerClassName)}
+        style={{ gridTemplateColumns: !showView ? '1fr' : null }}
+      >
         <MarkdownInput
           ref={inputAreaRef}
           className={classNames(styles.inputAreaWrapper, inputClassName)}
@@ -227,6 +284,7 @@ const Markdown = props => {
           onScroll={setScroll}
         />
         <MarkdownOutput
+          showView={showView}
           className={classNames(styles.outputAreaWrapper, outputClassName)}
           ref={outputAreaRef}
           scrollPercent={scroll}
