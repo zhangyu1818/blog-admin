@@ -1,5 +1,5 @@
 import React from 'react';
-import Markdown from '@/components/MarkdownComponent';
+import Markdown from 'react-markdown-mirror';
 
 const WritePage = () => <Markdown />;
 export default WritePage;

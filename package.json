@@ -38,6 +38,7 @@
     "react": "^16.6.3",
     "react-container-query": "^0.11.0",
     "react-document-title": "^2.0.3",
+    "react-markdown-mirror": "^1.0.0",
     "react-media": "^1.8.0",
     "umi-request": "^1.0.0"
   },
