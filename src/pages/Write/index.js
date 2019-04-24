@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import Markdown from 'react-markdown-mirror';
-import { PageHeader, Input, Button, Drawer, Icon, Popover } from 'antd';
-
+import { Button, Drawer, Icon, Input, PageHeader, Popover } from 'antd';
 import DrawerForm from './DrawerForm';
 import styles from './styles.less';
 
@@ -19,11 +18,16 @@ const InfoInner = () => (
 const WritePage = () => {
   const [title, onTitleChange] = useState('');
   const [drawer, setDrawerVisible] = useState(false);
+  const markdownEditor = useRef(null);
   const Info = () => (
     <Popover content={<InfoInner />} placement="bottomRight" title="信息" trigger="click">
       <Icon type="info" title="信息" className={styles.infoBtn} />
     </Popover>
   );
+  const markdownValues = () => {
+    const { markdown, html } = markdownEditor.current.getValue();
+    return { title, markdown, content: html };
+  };
   return (
     <div className={styles.markdown}>
       <PageHeader
@@ -43,9 +47,14 @@ const WritePage = () => {
         }
         className={styles.markdownHeader}
       />
-      <Markdown title={false} containerClassName={styles.markdownContent} extra={<Info />} />
+      <Markdown
+        ref={markdownEditor}
+        title={false}
+        containerClassName={styles.markdownContent}
+        extra={<Info />}
+      />
       <Drawer title="发布" visible={drawer} onClose={() => setDrawerVisible(false)}>
-        <DrawerForm />
+        <DrawerForm markdown={markdownValues} />
       </Drawer>
     </div>
   );

@@ -1,39 +1,20 @@
 import React, { useState } from 'react';
 import { Query } from 'react-apollo';
-import { gql } from 'apollo-boost';
 import { Card, Table, Tag, PageHeader } from 'antd';
 
 import moment from 'moment';
+
+import { LIMIT_POSTS } from '@/services/graphql/query';
 
 import styles from './styles.less';
 
 const { Column } = Table;
 
-const LIMIT_POSTS = gql`
-  query limit($currentPage: Int, $pageSize: Int) {
-    limitPosts(pagination: { currentPage: $currentPage, pageSize: $pageSize }) {
-      pagination {
-        currentPage
-        pageSize
-        total
-      }
-      posts {
-        _id
-        title
-        postedTime
-        updateTime
-        revisionCount
-        categories
-        tags
-      }
-    }
-  }
-`;
-
 const defaultValue = {
   pagination: {
     currentPage: 1,
     pageSize: 10,
+    total: 0,
   },
   posts: [],
 };
@@ -67,7 +48,7 @@ const PostsList = () => {
                   pagination={{ current: currentPage, pageSize, total, showSizeChanger: true }}
                   loading={loading}
                 >
-                  <Column title="名称" dataIndex="title" />
+                  <Column title="名称" dataIndex="_id" />
                   <Column
                     title="提交日期"
                     dataIndex="postedTime"
