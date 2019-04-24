@@ -17,10 +17,23 @@ export default [
         component: './Welcome',
       },
       {
-        path: '/write',
-        name: 'write',
+        path: '/posts',
+        name: 'posts',
         icon: 'smile',
-        component: './Write',
+        routes: [
+          {
+            path: '/posts/list',
+            name: 'list',
+            icon: 'smile',
+            component: './PostsList',
+          },
+          {
+            path: '/posts/write',
+            name: 'write',
+            icon: 'smile',
+            component: './Write',
+          },
+        ],
       },
       {
         path: 'https://github.com/umijs/umi-blocks/tree/master/ant-design-pro',

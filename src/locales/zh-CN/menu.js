@@ -6,5 +6,7 @@ export default {
   'menu.account.settings': '个人设置',
   'menu.account.trigger': '触发报错',
   'menu.account.logout': '退出登录',
-  'menu.write': '写作',
+  'menu.posts': '文章',
+  'menu.posts.list': '文章列表',
+  'menu.posts.write': '写作',
 };

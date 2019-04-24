@@ -11,10 +11,12 @@ import Media from 'react-media';
 import { formatMessage } from 'umi/locale';
 import Authorized from '@/utils/Authorized';
 import logo from '../assets/logo.svg';
-import Footer from './Footer';
 import Header from './Header';
 import Context from './MenuContext';
 import SiderMenu from '@/components/SiderMenu';
+
+import { ApolloProvider } from 'react-apollo';
+import client from '../services/graphql-client';
 
 import styles from './BasicLayout.less';
 
@@ -185,7 +187,6 @@ class BasicLayout extends React.PureComponent {
               {children}
             </Authorized>
           </Content>
-          {/*<Footer />*/}
         </Layout>
       </Layout>
     );
@@ -195,7 +196,9 @@ class BasicLayout extends React.PureComponent {
           <ContainerQuery query={query}>
             {params => (
               <Context.Provider value={this.getContext()}>
-                <div className={classNames(params)}>{layout}</div>
+                <ApolloProvider client={client}>
+                  <div className={classNames(params)}>{layout}</div>
+                </ApolloProvider>
               </Context.Provider>
             )}
           </ContainerQuery>
