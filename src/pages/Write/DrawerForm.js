@@ -1,25 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { Form, Select, Button } from 'antd';
-import { Mutation } from 'react-apollo';
 
-import { getCategories } from '@/services/write';
-import { ADD_POST } from '@/services/graphql/mutation';
+import { getCategories, getTags } from '@/services/write';
 
 import styles from './styles.less';
 
 const FormItem = Form.Item;
 const { Option } = Select;
 
-const DrawerForm = ({ form, markdown }) => {
+const DrawerForm = ({ form, categories, tags }) => {
   const { getFieldDecorator } = form;
-  const [categories, setCategories] = useState([]);
-  const [tags, setTags] = useState([]);
-  useEffect(() => {
-    getCategories().then(({ data }) => {
-      const { categories: fetchCategories } = data;
-      setCategories(fetchCategories);
-    });
-  }, []);
   return (
     <div className={styles.drawerForm}>
       <Form labelCol={{ span: 24 }} wrapperCol={{ span: 24 }}>
@@ -40,24 +30,18 @@ const DrawerForm = ({ form, markdown }) => {
             </Select>
           )}
         </FormItem>
-        <FormItem label="标签">{getFieldDecorator('tags')(<Select mode="tags" />)}</FormItem>
+        <FormItem label="标签">
+          {getFieldDecorator('tags')(
+            <Select mode="tags">
+              {tags.map(({ name }) => (
+                <Option key={name}>{name}</Option>
+              ))}
+            </Select>
+          )}
+        </FormItem>
       </Form>
       <footer className={styles.footer}>
-        <Mutation mutation={ADD_POST}>
-          {(addPost, { data, loading }) => {
-            return (
-              <Button
-                type="primary"
-                onClick={() => {
-                  const content = markdown();
-                  addPost({ variables: { data: content } });
-                }}
-              >
-                提交
-              </Button>
-            );
-          }}
-        </Mutation>
+        <Button type="primary">提交</Button>
       </footer>
     </div>
   );

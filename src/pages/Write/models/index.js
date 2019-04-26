@@ -1,20 +1,14 @@
-import { addPost } from '@/services/write';
-
 export default {
   namespace: 'write',
 
   state: {
     current: null,
-    categories: [],
-    tags: [],
   },
 
-  effects: {
-    *addPost({ data }, { call, put }) {
-      const response = yield call(addPost, data);
-      console.log(response);
+  reducers: {
+    saveCurrent(state, action) {
+      const current = action;
+      console.log(current);
     },
   },
-
-  reducers: {},
 };

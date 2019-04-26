@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Query } from 'react-apollo';
-import { Card, Table, Tag, PageHeader } from 'antd';
+import { Card, Table, Tag, PageHeader, Button } from 'antd';
 
 import moment from 'moment';
 
 import { LIMIT_POSTS } from '@/services/graphql/query';
+import { findPost } from '@/services/write';
 
 import styles from './styles.less';
 
@@ -30,8 +31,12 @@ const PostsList = () => {
     setCurrentPage(current);
     setPageSize(currentPageSize);
   };
+  const onClickEdit = async id => {
+    const { data } = await findPost(id);
+    console.log(data);
+  };
   return (
-    <Query query={LIMIT_POSTS} variables={{ currentPage, pageSize }}>
+    <Query query={LIMIT_POSTS} variables={{ currentPage, pageSize }} fetchPolicy="network-only">
       {({ loading, error, data }) => {
         const { limitPosts = defaultValue } = data;
         const { pagination, posts } = limitPosts;
@@ -64,6 +69,12 @@ const PostsList = () => {
                   <Column title="修订次数" dataIndex="revisionCount" />
                   <Column title="种类" dataIndex="categories" render={renderTag} />
                   <Column title="标签" dataIndex="tags" render={renderTag} />
+                  <Column
+                    title="操作"
+                    dataIndex="_id"
+                    key="action"
+                    render={id => <a onClick={() => onClickEdit('123')}>修改</a>}
+                  />
                 </Table>
               </Card>
             </div>

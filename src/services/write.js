@@ -1,25 +1,26 @@
-import { gql } from 'apollo-boost';
 import client from './graphql-client';
 
-const addPost = async data =>
+import { GET_CATEGORIES, GET_TAGS, FIND_POST } from './graphql/query';
+import { ADD_POST } from './graphql/mutation';
+
+export const addPost = async data =>
   await client.mutate({
     variables: { data },
-    mutation: gql`
-      mutation addPost($data: AddPostInput!) {
-        addPost(data: $data) {
-          _id
-        }
-      }
-    `,
+    mutation: ADD_POST,
   });
-const getCategories = async () =>
+
+export const getCategories = async () =>
   await client.query({
-    query: gql`
-      {
-        categories {
-          name
-        }
-      }
-    `,
+    query: GET_CATEGORIES,
   });
-export { addPost, getCategories };
+
+export const getTags = async () =>
+  await client.query({
+    query: GET_TAGS,
+  });
+
+export const findPost = async id =>
+  await client.query({
+    variables: { id },
+    query: FIND_POST,
+  });

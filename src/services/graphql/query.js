@@ -1,6 +1,6 @@
 import { gql } from 'apollo-boost';
 
-const LIMIT_POSTS = gql`
+export const LIMIT_POSTS = gql`
   query limit($currentPage: Int, $pageSize: Int) {
     limitPosts(pagination: { currentPage: $currentPage, pageSize: $pageSize }) {
       pagination {
@@ -21,4 +21,34 @@ const LIMIT_POSTS = gql`
   }
 `;
 
-export { LIMIT_POSTS };
+export const FIND_POST = gql`
+  query post($id: String!) {
+    post(id: $id) {
+      _id
+      title
+      markdown
+      content
+      categories
+      tags
+      postedTime
+      updateTime
+      revisionCount
+    }
+  }
+`;
+
+export const GET_CATEGORIES = gql`
+  {
+    categories {
+      name
+    }
+  }
+`;
+
+export const GET_TAGS = gql`
+  {
+    tags {
+      name
+    }
+  }
+`;
