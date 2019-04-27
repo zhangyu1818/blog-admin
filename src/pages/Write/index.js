@@ -1,35 +1,38 @@
 import React, { useRef, useState, useEffect } from 'react';
 import Markdown from 'react-markdown-mirror';
 import { Button, Drawer, Icon, Input, PageHeader, Popover } from 'antd';
+import { connect } from 'dva';
+
+import moment from 'moment';
+
 import DrawerForm from './DrawerForm';
+
 import styles from './styles.less';
+
 import { addPost, getCategories, getTags } from '@/services/write';
 
-const InfoInner = () => (
+const InfoInner = ({ postedTime, updateTime, revisionCount }) => (
   <dl className={styles.infoInner}>
     <dt>创建日期：</dt>
-    <dd>暂无信息</dd>
+    <dd>{postedTime ? moment(postedTime).format('YYYY年M月DD日 HH点mm分') : '暂无信息'}</dd>
     <dt>修改日期：</dt>
-    <dd>暂无信息</dd>
+    <dd>{updateTime ? moment(updateTime).format('YYYY年M月DD日 HH点mm分') : '暂无信息'}</dd>
     <dt>修订次数：</dt>
-    <dd>暂无信息</dd>
+    <dd>{revisionCount || '暂无信息'}</dd>
   </dl>
 );
 
-const WritePage = () => {
-  const [title, onTitleChange] = useState('');
+const WritePage = ({ current, dispatch }) => {
+  const [title, setTitle] = useState('');
   const [drawer, setDrawerVisible] = useState(false);
   const [categories, setCategories] = useState([]);
   const [tags, setTags] = useState([]);
+  const [info, setInfo] = useState(null);
   const markdownEditor = useRef(null);
-  const Info = () => (
-    <Popover content={<InfoInner />} placement="bottomRight" title="信息" trigger="click">
-      <Icon type="info" title="信息" className={styles.infoBtn} />
-    </Popover>
-  );
   const onCommit = async () => {
     const { markdown, html } = markdownEditor.current.getValue();
     const content = { title, markdown, content: html };
+    // eslint-disable-next-line no-unused-vars
     const data = await addPost(content);
   };
   useEffect(() => {
@@ -41,7 +44,28 @@ const WritePage = () => {
       const { tags: fetchTags } = data;
       setTags(fetchTags);
     });
+    return () => {
+      dispatch({
+        type: 'write/saveCurrent',
+        post: null,
+      });
+    };
   }, []);
+  useEffect(
+    () => {
+      if (current) {
+        const { content, title: currentTitle, postedTime, updateTime, revisionCount } = current;
+        setTitle(currentTitle);
+        setInfo({
+          postedTime,
+          updateTime,
+          revisionCount,
+        });
+        markdownEditor.current.setValue(content);
+      }
+    },
+    [current]
+  );
   return (
     <div className={styles.markdown}>
       <PageHeader
@@ -51,7 +75,7 @@ const WritePage = () => {
             placeholder="输入文章标题..."
             size="large"
             value={title}
-            onChange={({ target }) => onTitleChange(target.value)}
+            onChange={({ target }) => setTitle(target.value)}
           />
         }
         extra={
@@ -65,7 +89,16 @@ const WritePage = () => {
         ref={markdownEditor}
         title={false}
         containerClassName={styles.markdownContent}
-        extra={<Info />}
+        extra={
+          <Popover
+            content={<InfoInner {...info} />}
+            placement="bottomRight"
+            title="信息"
+            trigger="click"
+          >
+            <Icon type="info" title="信息" className={styles.infoBtn} />
+          </Popover>
+        }
       />
       <Drawer title="发布" visible={drawer} onClose={() => setDrawerVisible(false)}>
         <DrawerForm onCommit={onCommit} categories={categories} tags={tags} />
@@ -73,4 +106,4 @@ const WritePage = () => {
     </div>
   );
 };
-export default WritePage;
+export default connect(({ write }) => write)(WritePage);

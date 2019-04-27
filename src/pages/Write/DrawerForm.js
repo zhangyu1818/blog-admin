@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Form, Select, Button } from 'antd';
 
-import { getCategories, getTags } from '@/services/write';
+import { connect } from 'dva';
 
+import PostType from '../PostsList/postType';
 import styles from './styles.less';
 
 const FormItem = Form.Item;
@@ -14,10 +15,10 @@ const DrawerForm = ({ form, categories, tags }) => {
     <div className={styles.drawerForm}>
       <Form labelCol={{ span: 24 }} wrapperCol={{ span: 24 }}>
         <FormItem label="状态">
-          {getFieldDecorator('status', { initialValue: 1 })(
+          {getFieldDecorator('status', { initialValue: PostType.published })(
             <Select>
-              <Option value={0}>草稿</Option>
-              <Option value={1}>可见</Option>
+              <Option value={PostType.published}>可见</Option>
+              <Option value={PostType.draft}>草稿</Option>
             </Select>
           )}
         </FormItem>
@@ -47,4 +48,21 @@ const DrawerForm = ({ form, categories, tags }) => {
   );
 };
 
-export default Form.create()(DrawerForm);
+export default connect(({ write }) => write)(
+  Form.create({
+    mapPropsToFields({ current }) {
+      if (!current) return null;
+      return {
+        status: Form.createFormField({
+          value: current.type,
+        }),
+        categories: Form.createFormField({
+          value: current.categories,
+        }),
+        tags: Form.createFormField({
+          value: current.tags,
+        }),
+      };
+    },
+  })(DrawerForm)
+);

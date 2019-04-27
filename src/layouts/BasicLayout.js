@@ -10,12 +10,12 @@ import pathToRegexp from 'path-to-regexp';
 import Media from 'react-media';
 import { formatMessage } from 'umi/locale';
 import Authorized from '@/utils/Authorized';
+import { ApolloProvider } from 'react-apollo';
 import logo from '../assets/logo.svg';
 import Header from './Header';
 import Context from './MenuContext';
 import SiderMenu from '@/components/SiderMenu';
 
-import { ApolloProvider } from 'react-apollo';
 import client from '../services/graphql-client';
 
 import styles from './BasicLayout.less';
