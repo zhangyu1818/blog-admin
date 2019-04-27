@@ -8,7 +8,6 @@ import router from 'umi/router';
 import moment from 'moment';
 import { LIMIT_POSTS } from '@/services/graphql/query';
 
-import { findPost } from '@/services/write';
 import PostType from './postType';
 
 const { Column } = Table;
@@ -34,11 +33,9 @@ const PublishedList = ({ currentList, setSubTitle, dispatch }) => {
     setPageSize(currentPageSize);
   };
   const onClickEdit = async id => {
-    const { data } = await findPost(id);
-    const { post } = data;
-    dispatch({
-      type: 'write/saveCurrent',
-      post,
+    await dispatch({
+      type: 'postsList/findPostByID',
+      id,
     });
     router.push('/posts/write');
   };

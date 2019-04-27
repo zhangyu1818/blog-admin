@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Tabs, Card, PageHeader } from 'antd';
+import { Tabs, Card, PageHeader, Spin } from 'antd';
 
+import { connect } from 'dva';
 import DraftList from './draft';
 import PublishedList from './published';
 import TrashList from './trash';
@@ -11,7 +12,7 @@ import styles from './styles.less';
 
 const { TabPane } = Tabs;
 
-const PostsList = () => {
+const PostsList = ({ loading }) => {
   const [tabKey, setTabKey] = useState(PostType.published);
   const [subTitle, setSubTitle] = useState('');
   return (
@@ -29,24 +30,28 @@ const PostsList = () => {
       />
       <div className={styles.postsList}>
         <Card bordered={false}>
-          <Tabs tabBarStyle={{ display: 'none' }} activeKey={tabKey} animated={false}>
-            <TabPane tab="已发布" key={PostType.published}>
-              <PublishedList
-                setSubTitle={setSubTitle}
-                currentList={tabKey === PostType.published}
-              />
-            </TabPane>
-            <TabPane tab="草稿" key={PostType.draft}>
-              <DraftList setSubTitle={setSubTitle} currentList={tabKey === PostType.draft} />
-            </TabPane>
-            <TabPane tab="已删除" key={PostType.trash}>
-              <TrashList setSubTitle={setSubTitle} currentList={tabKey === PostType.trash} />
-            </TabPane>
-          </Tabs>
+          <Spin spinning={!!loading}>
+            <Tabs tabBarStyle={{ display: 'none' }} activeKey={tabKey} animated={false}>
+              <TabPane tab="已发布" key={PostType.published}>
+                <PublishedList
+                  setSubTitle={setSubTitle}
+                  currentList={tabKey === PostType.published}
+                />
+              </TabPane>
+              <TabPane tab="草稿" key={PostType.draft}>
+                <DraftList setSubTitle={setSubTitle} currentList={tabKey === PostType.draft} />
+              </TabPane>
+              <TabPane tab="已删除" key={PostType.trash}>
+                <TrashList setSubTitle={setSubTitle} currentList={tabKey === PostType.trash} />
+              </TabPane>
+            </Tabs>
+          </Spin>
         </Card>
       </div>
     </>
   );
 };
 
-export default PostsList;
+export default connect(({ loading: { models: { postsList } } }) => ({ loading: postsList }))(
+  PostsList
+);

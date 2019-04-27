@@ -9,7 +9,7 @@ import styles from './styles.less';
 const FormItem = Form.Item;
 const { Option } = Select;
 
-const DrawerForm = ({ form, categories, tags }) => {
+const DrawerForm = ({ form, categories, tags, onCommit }) => {
   const { getFieldDecorator } = form;
   return (
     <div className={styles.drawerForm}>
@@ -42,7 +42,9 @@ const DrawerForm = ({ form, categories, tags }) => {
         </FormItem>
       </Form>
       <footer className={styles.footer}>
-        <Button type="primary">提交</Button>
+        <Button type="primary" onClick={onCommit}>
+          提交
+        </Button>
       </footer>
     </div>
   );

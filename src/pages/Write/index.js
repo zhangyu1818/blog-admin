@@ -5,6 +5,7 @@ import { connect } from 'dva';
 
 import moment from 'moment';
 
+import client from '@/services/graphql-client';
 import DrawerForm from './DrawerForm';
 
 import styles from './styles.less';
@@ -45,6 +46,8 @@ const WritePage = ({ current, dispatch }) => {
       setTags(fetchTags);
     });
     return () => {
+      // 如果categories和tags还没有fatch完成，unmount会报错，此方法停止所有graphql请求，不知道有没有副作用
+      client.stop();
       dispatch({
         type: 'write/saveCurrent',
         post: null,
@@ -61,7 +64,7 @@ const WritePage = ({ current, dispatch }) => {
           updateTime,
           revisionCount,
         });
-        markdownEditor.current.setValue(content);
+        markdownEditor.current.setValue({ title: currentTitle, markdown: content });
       }
     },
     [current]

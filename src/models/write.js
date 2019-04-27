@@ -4,7 +4,6 @@ export default {
   state: {
     current: null,
   },
-
   reducers: {
     saveCurrent(state, { post }) {
       // eslint-disable-next-line no-param-reassign
