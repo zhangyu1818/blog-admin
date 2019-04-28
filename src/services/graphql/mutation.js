@@ -1,10 +1,17 @@
 import { gql } from 'apollo-boost';
 
-const ADD_POST = gql`
+export const ADD_POST = gql`
   mutation addPost($data: AddPostInput!) {
-    addPost(data: $data) {
+    post: addPost(data: $data) {
       _id
     }
   }
 `;
-export { ADD_POST };
+
+export const UPDATE_POST = gql`
+  mutation updatePost($data: UpdatePostInput!, $id: String!) {
+    post: updatePost(data: $data, id: $id) {
+      _id
+    }
+  }
+`;

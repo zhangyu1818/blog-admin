@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Query } from 'react-apollo';
-import { Table, Tag } from 'antd';
+import { Table, Tag, Divider } from 'antd';
 
 import { connect } from 'dva';
-import router from 'umi/router';
 
 import moment from 'moment';
 import { LIMIT_POSTS } from '@/services/graphql/query';
@@ -24,7 +23,7 @@ const defaultValue = {
 const renderTag = items =>
   items.length !== 0 ? items.map(item => <Tag key={item}>{item}</Tag>) : '无';
 
-const PublishedList = ({ currentList, setSubTitle, dispatch }) => {
+const PublishedList = ({ currentList, setSubTitle, dispatch, onEdit }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
@@ -32,17 +31,16 @@ const PublishedList = ({ currentList, setSubTitle, dispatch }) => {
     setCurrentPage(current);
     setPageSize(currentPageSize);
   };
-  const onClickEdit = async id => {
-    await dispatch({
+  const onClickEdit = id => {
+    dispatch({
       type: 'postsList/findPostByID',
       id,
     });
-    router.push('/posts/write');
   };
   useEffect(
     () => {
       if (currentList) {
-        setSubTitle(`共${total}篇已发布的文章`);
+        setSubTitle(`共${total}篇`);
       }
     },
     [currentList, total]
@@ -65,7 +63,7 @@ const PublishedList = ({ currentList, setSubTitle, dispatch }) => {
             pagination={{ current: currentPage, pageSize, total, showSizeChanger: true }}
             loading={loading}
           >
-            <Column title="名称" dataIndex="_id" />
+            <Column title="标题" dataIndex="title" />
             <Column
               title="提交日期"
               dataIndex="postedTime"
@@ -77,13 +75,19 @@ const PublishedList = ({ currentList, setSubTitle, dispatch }) => {
               render={text => (text ? moment(text).format('YYYY年M月DD日 HH点mm分') : '暂无数据')}
             />
             <Column title="修订次数" dataIndex="revisionCount" />
-            <Column title="种类" dataIndex="categories" render={renderTag} />
+            <Column title="分类" dataIndex="categories" render={renderTag} />
             <Column title="标签" dataIndex="tags" render={renderTag} />
             <Column
               title="操作"
               dataIndex="_id"
               key="action"
-              render={id => <a onClick={() => onClickEdit(id)}>修改</a>}
+              render={id => (
+                <>
+                  <a onClick={onEdit}>修改</a>
+                  <Divider type="vertical" />
+                  <a onClick={() => onClickEdit(id)}>编辑</a>
+                </>
+              )}
             />
           </Table>
         );

@@ -33,7 +33,7 @@ const DraftList = ({ setSubTitle, currentList }) => {
   useEffect(
     () => {
       if (currentList) {
-        setSubTitle(`共${total}篇文章已被删除`);
+        setSubTitle(`共${total}篇`);
       }
     },
     [currentList, total]
@@ -56,7 +56,7 @@ const DraftList = ({ setSubTitle, currentList }) => {
             pagination={{ current: currentPage, pageSize, total, showSizeChanger: true }}
             loading={loading}
           >
-            <Column title="名称" dataIndex="_id" />
+            <Column title="标题" dataIndex="title" />
             <Column
               title="提交日期"
               dataIndex="postedTime"
@@ -68,7 +68,7 @@ const DraftList = ({ setSubTitle, currentList }) => {
               render={text => (text ? moment(text).format('YYYY年M月DD日 HH点mm分') : '暂无数据')}
             />
             <Column title="修订次数" dataIndex="revisionCount" />
-            <Column title="种类" dataIndex="categories" render={renderTag} />
+            <Column title="分类" dataIndex="categories" render={renderTag} />
             <Column title="标签" dataIndex="tags" render={renderTag} />
           </Table>
         );

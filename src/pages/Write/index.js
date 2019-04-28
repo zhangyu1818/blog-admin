@@ -10,7 +10,7 @@ import DrawerForm from './DrawerForm';
 
 import styles from './styles.less';
 
-import { addPost, getCategories, getTags } from '@/services/write';
+import { addPost, getCategories, getTags, updatePost } from '@/services/write';
 
 const InfoInner = ({ postedTime, updateTime, revisionCount }) => (
   <dl className={styles.infoInner}>
@@ -19,7 +19,7 @@ const InfoInner = ({ postedTime, updateTime, revisionCount }) => (
     <dt>修改日期：</dt>
     <dd>{updateTime ? moment(updateTime).format('YYYY年M月DD日 HH点mm分') : '暂无信息'}</dd>
     <dt>修订次数：</dt>
-    <dd>{revisionCount || '暂无信息'}</dd>
+    <dd>{`${revisionCount}次` || '暂无信息'}</dd>
   </dl>
 );
 
@@ -30,11 +30,18 @@ const WritePage = ({ current, dispatch }) => {
   const [tags, setTags] = useState([]);
   const [info, setInfo] = useState(null);
   const markdownEditor = useRef(null);
-  const onCommit = async () => {
+  const onCommit = async (other, id) => {
     const { markdown, html } = markdownEditor.current.getValue();
-    const content = { title, markdown, content: html };
+    const content = { title, markdown, content: html, ...other };
     // eslint-disable-next-line no-unused-vars
-    const data = await addPost(content);
+    try {
+      if (id) return await updatePost(content, id);
+      return await addPost(content);
+    } catch (e) {
+      return null;
+    } finally {
+      setDrawerVisible(false);
+    }
   };
   useEffect(() => {
     getCategories().then(({ data }) => {
@@ -46,7 +53,7 @@ const WritePage = ({ current, dispatch }) => {
       setTags(fetchTags);
     });
     return () => {
-      // 如果categories和tags还没有fatch完成，unmount会报错，此方法停止所有graphql请求，不知道有没有副作用
+      // 如果categories和tags还没有fetch完成，unmount会报错，此方法停止所有graphql请求，不知道有没有副作用
       client.stop();
       dispatch({
         type: 'write/saveCurrent',
@@ -57,14 +64,14 @@ const WritePage = ({ current, dispatch }) => {
   useEffect(
     () => {
       if (current) {
-        const { content, title: currentTitle, postedTime, updateTime, revisionCount } = current;
+        const { markdown, title: currentTitle, postedTime, updateTime, revisionCount } = current;
         setTitle(currentTitle);
         setInfo({
           postedTime,
           updateTime,
           revisionCount,
         });
-        markdownEditor.current.setValue({ title: currentTitle, markdown: content });
+        markdownEditor.current.setValue({ title: currentTitle, markdown });
       }
     },
     [current]
