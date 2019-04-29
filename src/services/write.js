@@ -29,5 +29,4 @@ export const findPost = async id =>
   await client.query({
     variables: { id },
     query: FIND_POST,
-    fetchPolicy: 'network-only',
   });

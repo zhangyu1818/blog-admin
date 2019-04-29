@@ -27,5 +27,12 @@ const client = new ApolloClient({
     });
   },
 });
-
+client.defaultOptions = {
+  watchQuery: {
+    fetchPolicy: 'network-only',
+  },
+  query: {
+    fetchPolicy: 'network-only',
+  },
+};
 export default client;

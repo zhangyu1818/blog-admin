@@ -42,7 +42,6 @@ const DraftList = ({ setSubTitle, currentList }) => {
     <Query
       query={LIMIT_POSTS}
       variables={{ currentPage, pageSize, type: PostType.trash }}
-      fetchPolicy="network-only"
     >
       {({ loading, data }) => {
         const { limitPosts = defaultValue } = data;

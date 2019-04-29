@@ -32,8 +32,7 @@ const WritePage = ({ current, dispatch }) => {
   const markdownEditor = useRef(null);
   const onCommit = async (other, id) => {
     const { markdown, html } = markdownEditor.current.getValue();
-    const content = { title, markdown, content: html, ...other };
-    // eslint-disable-next-line no-unused-vars
+    const content = { title: title || '无题', markdown, content: html, ...other };
     try {
       if (id) return await updatePost(content, id);
       return await addPost(content);

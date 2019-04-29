@@ -46,11 +46,7 @@ const PublishedList = ({ currentList, setSubTitle, dispatch, onEdit }) => {
     [currentList, total]
   );
   return (
-    <Query
-      query={LIMIT_POSTS}
-      variables={{ currentPage, pageSize, type: PostType.published }}
-      fetchPolicy="network-only"
-    >
+    <Query query={LIMIT_POSTS} variables={{ currentPage, pageSize, type: PostType.published }}>
       {({ loading, data }) => {
         const { limitPosts = defaultValue } = data;
         const { pagination, posts } = limitPosts;
@@ -83,7 +79,7 @@ const PublishedList = ({ currentList, setSubTitle, dispatch, onEdit }) => {
               key="action"
               render={id => (
                 <>
-                  <a onClick={onEdit}>修改</a>
+                  <a onClick={() => onEdit(id)}>修改</a>
                   <Divider type="vertical" />
                   <a onClick={() => onClickEdit(id)}>编辑</a>
                 </>

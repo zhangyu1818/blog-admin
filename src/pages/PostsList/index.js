@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Tabs, Card, PageHeader, Spin, Modal, Form, Input, Radio, Select } from 'antd';
+import { Tabs, Card, PageHeader, Spin, Modal, Form, Input, Radio, Select, message } from 'antd';
 import { Query } from 'react-apollo';
 
 import { connect } from 'dva';
@@ -7,23 +7,27 @@ import DraftList from './draft';
 import PublishedList from './published';
 import TrashList from './trash';
 
+import { updatePost } from '@/services/write';
+import client from '@/services/graphql-client';
+
 import PostType from './postType';
 
 import styles from './styles.less';
-import { GET_CATEGORIES, GET_TAGS } from '@/services/graphql/query';
+import { FIND_POST, GET_CATEGORIES, GET_TAGS } from '@/services/graphql/query';
 
 const { TabPane } = Tabs;
 const { Option } = Select;
 const FormItem = Form.Item;
 const RadioGroup = Radio.Group;
 
-const PostsList = ({ loading, form }) => {
+const PostsList = ({ loading }) => {
   const [tabKey, setTabKey] = useState(PostType.published);
   const [subTitle, setSubTitle] = useState('');
+  const [editId, setEditId] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const { getFieldDecorator } = form;
-  const onEdit = async id => {
+  const onEdit = id => {
     setModalVisible(true);
+    setEditId(id);
   };
   return (
     <>
@@ -46,10 +50,15 @@ const PostsList = ({ loading, form }) => {
                 <PublishedList
                   setSubTitle={setSubTitle}
                   currentList={tabKey === PostType.published}
+                  onEdit={onEdit}
                 />
               </TabPane>
               <TabPane tab="草稿" key={PostType.draft}>
-                <DraftList setSubTitle={setSubTitle} currentList={tabKey === PostType.draft} />
+                <DraftList
+                  setSubTitle={setSubTitle}
+                  currentList={tabKey === PostType.draft}
+                  onEdit={onEdit}
+                />
               </TabPane>
               <TabPane tab="已删除" key={PostType.trash}>
                 <TrashList setSubTitle={setSubTitle} currentList={tabKey === PostType.trash} />
@@ -58,7 +67,73 @@ const PostsList = ({ loading, form }) => {
           </Spin>
         </Card>
       </div>
-      <Modal title="修改" visible={modalVisible} onCancel={() => setModalVisible(false)}>
+      <Query
+        query={FIND_POST}
+        skip={editId === null}
+        variables={{ id: editId }}
+        notifyOnNetworkStatusChange
+      >
+        {({ loading: modalLoading, data = {} }) => {
+          const { post } = data;
+          return (
+            <EditModal
+              visible={modalVisible}
+              onCancel={() => setModalVisible(false)}
+              loading={modalLoading}
+              editId={editId}
+              post={post}
+            />
+          );
+        }}
+      </Query>
+    </>
+  );
+};
+
+const EditModal = Form.create({
+  mapPropsToFields({ post }) {
+    if (!post) return undefined;
+    const { title, type, categories, tags } = post;
+    return {
+      title: Form.createFormField({
+        value: title,
+      }),
+      type: Form.createFormField({
+        value: type,
+      }),
+      categories: Form.createFormField({
+        value: categories,
+      }),
+      tags: Form.createFormField({
+        value: tags,
+      }),
+    };
+  },
+})(({ form, visible, onCancel, editId, loading }) => {
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const { getFieldDecorator } = form;
+  const onSubmit = async () => {
+    setConfirmLoading(true);
+    const values = form.getFieldsValue();
+    let data;
+    try {
+      data = await updatePost(values, editId);
+    } finally {
+      if (data) message.success('操作成功');
+      else message.success('操作失败');
+    }
+    setConfirmLoading(false);
+    client.resetStore();
+  };
+  return (
+    <Modal
+      title="修改"
+      visible={visible}
+      confirmLoading={confirmLoading}
+      onCancel={onCancel}
+      onOk={onSubmit}
+    >
+      <Spin spinning={loading}>
         <Form layout="vertical">
           <FormItem label="标题">{getFieldDecorator('title')(<Input />)}</FormItem>
           <FormItem>
@@ -98,11 +173,11 @@ const PostsList = ({ loading, form }) => {
             </Query>
           </FormItem>
         </Form>
-      </Modal>
-    </>
+      </Spin>
+    </Modal>
   );
-};
+});
 
 export default connect(({ loading: { models: { postsList } } }) => ({ loading: postsList }))(
-  Form.create()(PostsList)
+  PostsList
 );

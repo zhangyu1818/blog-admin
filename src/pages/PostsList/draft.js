@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Query } from 'react-apollo';
-import { Table, Tag } from 'antd';
+import { Divider, Table, Tag } from 'antd';
 
 import moment from 'moment';
 
@@ -25,7 +25,7 @@ const defaultValue = {
 const renderTag = items =>
   items.length !== 0 ? items.map(item => <Tag key={item}>{item}</Tag>) : '无';
 
-const DraftList = ({ setSubTitle, currentList, dispatch }) => {
+const DraftList = ({ setSubTitle, currentList, dispatch, onEdit }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
@@ -51,11 +51,7 @@ const DraftList = ({ setSubTitle, currentList, dispatch }) => {
     [currentList, total]
   );
   return (
-    <Query
-      query={LIMIT_POSTS}
-      variables={{ currentPage, pageSize, type: PostType.draft }}
-      fetchPolicy="network-only"
-    >
+    <Query query={LIMIT_POSTS} variables={{ currentPage, pageSize, type: PostType.draft }}>
       {({ loading, data }) => {
         const { limitPosts = defaultValue } = data;
         const { pagination, posts } = limitPosts;
@@ -86,7 +82,13 @@ const DraftList = ({ setSubTitle, currentList, dispatch }) => {
               title="操作"
               dataIndex="_id"
               key="action"
-              render={id => <a onClick={() => onClickEdit(id)}>修改</a>}
+              render={id => (
+                <>
+                  <a onClick={() => onEdit(id)}>修改</a>
+                  <Divider type="vertical" />
+                  <a onClick={() => onClickEdit(id)}>修改</a>
+                </>
+              )}
             />
           </Table>
         );
