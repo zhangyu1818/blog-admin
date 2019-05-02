@@ -1,0 +1,114 @@
+# This file was generated based on ".graphqlconfig". Do not edit manually.
+
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+type Categories {
+  _id: ID!
+  name: String!
+  posts: [Post!]!
+}
+
+type LimitPost {
+  pagination: Pagination!
+  posts: [Post!]!
+}
+
+type Mutation {
+  "create a new category"
+  addCategory(name: String!): Categories
+  "add new post"
+  addPost(data: AddPostInput!): Post!
+  "create a new tag"
+  addTag(name: String!): Tags
+  "change category name"
+  changeCategoryName(id: String!, name: String!): Categories!
+  "change tag name"
+  changeTagName(id: String!, name: String!): Tags!
+  "delete category by id"
+  deleteCategory(id: String!): Categories!
+  "delete post by id"
+  deletePost(id: String!): Post!
+  "delete tag by id"
+  deleteTag(id: String!): Tags!
+  "update post by id"
+  updatePost(data: UpdatePostInput!, id: String!): Post!
+}
+
+type Pagination {
+  currentPage: Int!
+  pageSize: Int!
+  total: Int!
+}
+
+type Post {
+  _id: ID!
+  categories: [String]!
+  content: String!
+  markdown: String!
+  postedTime: DateTime!
+  revisionCount: Int!
+  tags: [String]!
+  title: String!
+  type: String!
+  updateTime: DateTime
+}
+
+type Query {
+  "query categories"
+  categories(type: String = "published"): [Categories!]!
+  "query category by id"
+  category(id: String!): Categories!
+  "query draft posts"
+  draft: [Post!]!
+  "query posts by pagination"
+  limitPosts(pagination: PaginationInput!, type: String = "published"): LimitPost!
+  "query post by id"
+  post(id: String!): Post!
+  "query published posts"
+  posts: [Post!]!
+  "query tag by id"
+  tag(id: String!): Tags!
+  "query tags"
+  tags(type: String = "published"): [Tags!]!
+  "query trash posts"
+  trash: [Post!]!
+}
+
+"post tags"
+type Tags {
+  _id: ID!
+  name: String!
+  posts: [Post!]!
+}
+
+"post input type"
+input AddPostInput {
+  categories: [String!]
+  content: String!
+  markdown: String!
+  tags: [String!]
+  title: String!
+  type: String = "draft"
+}
+
+"pagination input"
+input PaginationInput {
+  currentPage: Int = 1
+  pageSize: Int = 10
+}
+
+"post update input type"
+input UpdatePostInput {
+  categories: [String!]
+  content: String
+  markdown: String
+  tags: [String!]
+  title: String
+  type: String
+}
+
+"The javascript `Date` as string. Type represents date and time as the ISO Date string."
+scalar DateTime
