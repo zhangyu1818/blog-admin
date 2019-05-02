@@ -9,10 +9,12 @@ const client = new ApolloClient({
   onError: ({ graphQLErrors }) => {
     graphQLErrors.forEach(({ extensions, message, path }) => {
       const { code } = extensions;
-      const pathInfo = path.map((graphql, index) => (
-        // eslint-disable-next-line react/no-array-index-key
-        <Paragraph key={index}>graphQL请求——{graphql}</Paragraph>
-      ));
+      const pathInfo =
+        path &&
+        path.map((graphql, index) => (
+          // eslint-disable-next-line react/no-array-index-key
+          <Paragraph key={index}>graphQL请求——{graphql}</Paragraph>
+        ));
       const error = (
         <>
           <Paragraph copyable>{message}</Paragraph>
@@ -30,9 +32,13 @@ const client = new ApolloClient({
 client.defaultOptions = {
   watchQuery: {
     fetchPolicy: 'network-only',
+    notifyOnNetworkStatusChange: true,
   },
   query: {
     fetchPolicy: 'network-only',
+  },
+  mutate: {
+    fetchPolicy: 'no-cache',
   },
 };
 export default client;

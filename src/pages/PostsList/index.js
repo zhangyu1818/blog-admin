@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Tabs, Card, PageHeader, Spin, Modal, Form, Input, Radio, Select, message } from 'antd';
 import { Query } from 'react-apollo';
 
@@ -29,6 +29,15 @@ const PostsList = ({ loading }) => {
     setModalVisible(true);
     setEditId(id);
   };
+  const changeType = type => async id => {
+    try {
+      await updatePost({ type }, id);
+      message.success('操作成功');
+      await client.resetStore();
+    } catch (e) {
+      message.error('操作失败');
+    }
+  };
   return (
     <>
       <PageHeader
@@ -51,6 +60,7 @@ const PostsList = ({ loading }) => {
                   setSubTitle={setSubTitle}
                   currentList={tabKey === PostType.published}
                   onEdit={onEdit}
+                  onDelete={changeType(PostType.trash)}
                 />
               </TabPane>
               <TabPane tab="草稿" key={PostType.draft}>
@@ -58,10 +68,15 @@ const PostsList = ({ loading }) => {
                   setSubTitle={setSubTitle}
                   currentList={tabKey === PostType.draft}
                   onEdit={onEdit}
+                  onDelete={changeType(PostType.trash)}
                 />
               </TabPane>
               <TabPane tab="已删除" key={PostType.trash}>
-                <TrashList setSubTitle={setSubTitle} currentList={tabKey === PostType.trash} />
+                <TrashList
+                  setSubTitle={setSubTitle}
+                  currentList={tabKey === PostType.trash}
+                  onRecovery={changeType(PostType.draft)}
+                />
               </TabPane>
             </Tabs>
           </Spin>
@@ -89,7 +104,7 @@ const PostsList = ({ loading }) => {
     </>
   );
 };
-
+// 点击修改时的弹出窗
 const EditModal = Form.create({
   mapPropsToFields({ post }) {
     if (!post) return undefined;
@@ -115,15 +130,16 @@ const EditModal = Form.create({
   const onSubmit = async () => {
     setConfirmLoading(true);
     const values = form.getFieldsValue();
-    let data;
     try {
-      data = await updatePost(values, editId);
+      await updatePost(values, editId);
+      message.success('操作成功');
+      onCancel();
+      await client.resetStore();
+    } catch (e) {
+      message.error('操作失败');
     } finally {
-      if (data) message.success('操作成功');
-      else message.success('操作失败');
+      setConfirmLoading(false);
     }
-    setConfirmLoading(false);
-    client.resetStore();
   };
   return (
     <Modal

@@ -2,13 +2,21 @@ export default [
   {
     path: '/user',
     component: '../layouts/UserLayout',
-    routes: [{ path: '/user', component: './Welcome' }],
+    routes: [
+      {
+        path: '/user',
+        component: './Login',
+      },
+    ],
   },
   {
     path: '/',
     component: '../layouts/BasicLayout',
     routes: [
-      { path: '/', redirect: '/welcome' },
+      {
+        path: '/',
+        redirect: '/welcome',
+      },
       // dashboard
       {
         path: '/welcome',

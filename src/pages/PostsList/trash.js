@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Query } from 'react-apollo';
-import { Table, Tag } from 'antd';
+import { Divider, Modal, Table, Tag } from 'antd';
 
 import moment from 'moment';
 
@@ -9,6 +9,7 @@ import { LIMIT_POSTS } from '@/services/graphql/query';
 import PostType from './postType';
 
 const { Column } = Table;
+const { confirm } = Modal;
 
 const defaultValue = {
   pagination: {
@@ -22,7 +23,7 @@ const defaultValue = {
 const renderTag = items =>
   items.length !== 0 ? items.map(item => <Tag key={item}>{item}</Tag>) : '无';
 
-const DraftList = ({ setSubTitle, currentList }) => {
+const DraftList = ({ setSubTitle, currentList, onRecovery }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
@@ -39,10 +40,7 @@ const DraftList = ({ setSubTitle, currentList }) => {
     [currentList, total]
   );
   return (
-    <Query
-      query={LIMIT_POSTS}
-      variables={{ currentPage, pageSize, type: PostType.trash }}
-    >
+    <Query query={LIMIT_POSTS} variables={{ currentPage, pageSize, type: PostType.trash }}>
       {({ loading, data }) => {
         const { limitPosts = defaultValue } = data;
         const { pagination, posts } = limitPosts;
@@ -69,6 +67,31 @@ const DraftList = ({ setSubTitle, currentList }) => {
             <Column title="修订次数" dataIndex="revisionCount" />
             <Column title="分类" dataIndex="categories" render={renderTag} />
             <Column title="标签" dataIndex="tags" render={renderTag} />
+            <Column
+              title="操作"
+              dataIndex="_id"
+              key="action"
+              render={id => (
+                <>
+                  <a
+                    onClick={() => {
+                      confirm({
+                        title: '确定要还原吗？',
+                        onOk() {
+                          return new Promise(resolve => {
+                            onRecovery(id).then(resolve);
+                          });
+                        },
+                      });
+                    }}
+                  >
+                    还原
+                  </a>
+                  <Divider type="vertical" />
+                  <a>永久删除</a>
+                </>
+              )}
+            />
           </Table>
         );
       }}

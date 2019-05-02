@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Query } from 'react-apollo';
-import { Table, Tag, Divider } from 'antd';
+import { Table, Tag, Divider, Modal } from 'antd';
 
 import { connect } from 'dva';
 
@@ -10,6 +10,7 @@ import { LIMIT_POSTS } from '@/services/graphql/query';
 import PostType from './postType';
 
 const { Column } = Table;
+const { confirm } = Modal;
 
 const defaultValue = {
   pagination: {
@@ -23,7 +24,7 @@ const defaultValue = {
 const renderTag = items =>
   items.length !== 0 ? items.map(item => <Tag key={item}>{item}</Tag>) : '无';
 
-const PublishedList = ({ currentList, setSubTitle, dispatch, onEdit }) => {
+const PublishedList = ({ currentList, setSubTitle, dispatch, onEdit, onDelete }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
@@ -71,7 +72,7 @@ const PublishedList = ({ currentList, setSubTitle, dispatch, onEdit }) => {
               render={text => (text ? moment(text).format('YYYY年M月DD日 HH点mm分') : '暂无数据')}
             />
             <Column title="修订次数" dataIndex="revisionCount" />
-            <Column title="分类" dataIndex="categories" render={renderTag} />
+            <Column title="分类" dataIndex="categories" render={renderTag} filters={[]}/>
             <Column title="标签" dataIndex="tags" render={renderTag} />
             <Column
               title="操作"
@@ -82,6 +83,21 @@ const PublishedList = ({ currentList, setSubTitle, dispatch, onEdit }) => {
                   <a onClick={() => onEdit(id)}>修改</a>
                   <Divider type="vertical" />
                   <a onClick={() => onClickEdit(id)}>编辑</a>
+                  <Divider type="vertical" />
+                  <a
+                    onClick={() => {
+                      confirm({
+                        title: '确定要删除吗？',
+                        onOk() {
+                          return new Promise(resolve => {
+                            onDelete(id).then(resolve);
+                          });
+                        },
+                      });
+                    }}
+                  >
+                    删除
+                  </a>
                 </>
               )}
             />

@@ -1,17 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Query } from 'react-apollo';
-import { Divider, Table, Tag } from 'antd';
+import { Divider, Modal, Table, Tag } from 'antd';
 
 import moment from 'moment';
 
 import { LIMIT_POSTS } from '@/services/graphql/query';
-import { findPost } from '@/services/write';
 
-import router from 'umi/router';
 import { connect } from 'dva';
 import PostType from './postType';
 
 const { Column } = Table;
+const { confirm } = Modal;
 
 const defaultValue = {
   pagination: {
@@ -25,7 +24,7 @@ const defaultValue = {
 const renderTag = items =>
   items.length !== 0 ? items.map(item => <Tag key={item}>{item}</Tag>) : '无';
 
-const DraftList = ({ setSubTitle, currentList, dispatch, onEdit }) => {
+const DraftList = ({ setSubTitle, currentList, dispatch, onEdit, onDelete }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [total, setTotal] = useState(0);
@@ -34,13 +33,10 @@ const DraftList = ({ setSubTitle, currentList, dispatch, onEdit }) => {
     setPageSize(currentPageSize);
   };
   const onClickEdit = async id => {
-    const { data } = await findPost(id);
-    const { post } = data;
     dispatch({
-      type: 'write/saveCurrent',
-      post,
+      type: 'postsList/findPostByID',
+      id,
     });
-    router.push('/posts/write');
   };
   useEffect(
     () => {
@@ -86,7 +82,22 @@ const DraftList = ({ setSubTitle, currentList, dispatch, onEdit }) => {
                 <>
                   <a onClick={() => onEdit(id)}>修改</a>
                   <Divider type="vertical" />
-                  <a onClick={() => onClickEdit(id)}>修改</a>
+                  <a onClick={() => onClickEdit(id)}>编辑</a>
+                  <Divider type="vertical" />
+                  <a
+                    onClick={() => {
+                      confirm({
+                        title: '确定要删除吗？',
+                        onOk() {
+                          return new Promise(resolve => {
+                            onDelete(id).then(resolve);
+                          });
+                        },
+                      });
+                    }}
+                  >
+                    删除
+                  </a>
                 </>
               )}
             />
