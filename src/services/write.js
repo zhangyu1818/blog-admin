@@ -1,6 +1,6 @@
 import client from './graphql-client';
 
-import { GET_CATEGORIES, GET_TAGS, FIND_POST, LIMIT_POSTS } from './graphql/query';
+import { GET_CATEGORIES, GET_TAGS, FIND_POST } from './graphql/query';
 import { ADD_POST, UPDATE_POST } from './graphql/mutation';
 
 export const addPost = async data =>

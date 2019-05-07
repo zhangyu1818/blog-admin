@@ -19,7 +19,7 @@ const InfoInner = ({ postedTime, updateTime, revisionCount }) => (
     <dt>修改日期：</dt>
     <dd>{updateTime ? moment(updateTime).format('YYYY年M月DD日 HH点mm分') : '暂无信息'}</dd>
     <dt>修订次数：</dt>
-    <dd>{`${revisionCount}次` || '暂无信息'}</dd>
+    <dd>{revisionCount ? `${revisionCount}次` : '暂无信息'}</dd>
   </dl>
 );
 

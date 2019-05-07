@@ -26,6 +26,7 @@ export default [
       {
         path: '/',
         redirect: '/posts/list',
+        authority: ['admin'],
       },
       {
         path: '/posts',
