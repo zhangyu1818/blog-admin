@@ -124,3 +124,12 @@ export async function queryNotices(params = {}) {
 export async function getFakeCaptcha(mobile) {
   return request(`/api/captcha?mobile=${mobile}`);
 }
+/*
+api
+ */
+
+export const userLogin = async params =>
+  request('/api/user/login', {
+    method: 'POST',
+    data: params,
+  });
